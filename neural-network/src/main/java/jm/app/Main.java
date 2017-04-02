@@ -25,10 +25,29 @@ public class Main {
         label[2][0] = 1;
         label[3][0] = 1;
 
+        /*
+        Double[][][] weights = new Double[1][][];
+        weights[0] = new Double[1][2];
+        weights[0][0][0] = 1.209879;
+        weights[0][0][1] = 1.275985;
+
+        Double[][] biases = new Double[1][];
+        biases[0] = new Double[1];
+        biases[0][0] = -0.010177;
+        */
+
         NeuralNetwork network = new NeuralNetwork(2, 10, 1);
         network.train(input, label);
-        double[] res = network.forward(input[1]);
-        printRes(res);
+        //network.setWeitghts(weights);
+        //network.setBiases(biases);
+        double[] res1 = network.forward(input[0]);
+        double[] res2 = network.forward(input[1]);
+        double[] res3 = network.forward(input[2]);
+        double[] res4 = network.forward(input[3]);
+        printRes(res1);
+        printRes(res2);
+        printRes(res3);
+        printRes(res4);
     }
 
     private static void printRes(double[] res){

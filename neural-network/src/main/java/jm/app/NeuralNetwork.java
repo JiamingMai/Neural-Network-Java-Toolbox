@@ -9,6 +9,14 @@ public class NeuralNetwork {
     double lambda = 0.01;
     int epoch = 100000;
 
+    public void setWeitghts(Double[][][] weights) {
+        this.weights = weights;
+    }
+
+    public void setBiases(Double[][] biases) {
+        this.biases = biases;
+    }
+
     public NeuralNetwork(int... numOfEachLayer) {
         biases = new Double[numOfEachLayer.length - 1][];
         for (int i = 0; i < biases.length; i++) {
@@ -54,19 +62,21 @@ public class NeuralNetwork {
     }
 
     public void train(double[][] input, double[][] label) {
+        train(input, label, input.length);
+    }
+
+    public void train(double[][] input, double[][] label, int batchSize) {
         for (int i = 0; i < epoch; i++) {
-            for (int sampleNo = 0; sampleNo < input.length; sampleNo++) {
-                double[][] sensitivity = estSensitivity(input, label, sampleNo);
-                updateWeights(sensitivity);
-                updateBiases(sensitivity);
-                printMse(input, label);
-            }
+            double[][] sensitivity = estSensitivityByBatch(input, label, batchSize);
+            updateWeights(sensitivity);
+            updateBiases(sensitivity);
+            printMse(input, label);
         }
     }
 
     private void printMse(double[][] input, double[][] label) {
         double sum = 0;
-        for(int i = 0; i < input.length; i++){
+        for (int i = 0; i < input.length; i++) {
             double[] res = forward(input[i]);
             for (int j = 0; j < label[i].length; j++) {
                 sum += (res[j] - label[i][j]) * (res[j] - label[i][j]);
@@ -94,15 +104,18 @@ public class NeuralNetwork {
         }
     }
 
-    private double[][] estSensitivity(double[][] input, double[][] label, int sampleNo) {
+    private double[][] estSensitivityByBatch(double[][] input, double[][] label, int batchSize) {
         double[][] sensitivity = new double[biases.length][];
         for (int i = 0; i < biases.length; i++) {
             sensitivity[i] = new double[biases[i].length];
         }
 
-        double[] output = forward(input[sampleNo]);
-        for (int i = 0; i < output.length; i++) {
-            sensitivity[sensitivity.length - 1][i] = -2 * output[i] * (1 - output[i]) * (label[sampleNo][i] - output[i]);
+        for (int k = 0; k < batchSize; k++) {
+            int sampleNo = generateSampleNo(input, batchSize);
+            double[] output = forward(input[sampleNo]);
+            for (int i = 0; i < output.length; i++) {
+                sensitivity[sensitivity.length - 1][i] += -2 * output[i] * (1 - output[i]) * (label[sampleNo][i] - output[i]);
+            }
         }
 
         for (int layer = sensitivity.length - 2; layer >= 0; layer--) {
@@ -112,6 +125,12 @@ public class NeuralNetwork {
             }
         }
         return sensitivity;
+    }
+
+    private int generateSampleNo(double[][] input, int batchSize){
+        Random random = new Random();
+        int sampleNo = random.nextInt(input.length);
+        return sampleNo;
     }
 
     private double[] selectColumn(Double[][] mat, int col) {
