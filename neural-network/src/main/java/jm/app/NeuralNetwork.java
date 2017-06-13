@@ -8,6 +8,7 @@ public class NeuralNetwork {
     Double[][] outputMat;
     double lambda = 0.01;
     int epoch = 100000;
+    final double RANDOM_COEFFIENCE = 1.0; 
 
     public void setWeitghts(Double[][][] weights) {
         this.weights = weights;
@@ -46,7 +47,7 @@ public class NeuralNetwork {
         for (int i = 0; i < weights.length; i++) {
             for (int j = 0; j < weights[i].length; j++) {
                 for (int k = 0; k < weights[i][j].length; k++) {
-                    weights[i][j][k] = 0.1 * random.nextDouble();
+                    weights[i][j][k] = RANDOM_COEFFIENCE * random.nextDouble();
                 }
             }
         }
@@ -56,7 +57,7 @@ public class NeuralNetwork {
         Random random = new Random();
         for (int i = 0; i < biases.length; i++) {
             for (int j = 0; j < biases[i].length; j++) {
-                biases[i][j] = 0.1 * random.nextDouble();
+                biases[i][j] = RANDOM_COEFFIENCE * random.nextDouble();
             }
         }
     }
@@ -121,7 +122,7 @@ public class NeuralNetwork {
         for (int layer = sensitivity.length - 2; layer >= 0; layer--) {
             for (int i = 0; i < sensitivity[layer].length; i++) {
                 sensitivity[layer][i] = outputMat[layer + 1][i] * (1 - outputMat[layer + 1][i])
-                        * innerProduct(selectColumn(weights[layer + 1], layer + 1), sensitivity[layer + 1]);
+                        * innerProduct(selectColumn(weights[layer + 1], i), sensitivity[layer + 1]);
             }
         }
         return sensitivity;
