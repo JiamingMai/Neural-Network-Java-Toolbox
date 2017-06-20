@@ -6,9 +6,26 @@ public class NeuralNetwork {
     Double[][][] weights;
     Double[][] biases;
     Double[][] outputMat;
-    double lambda = 0.01;
+    double lambda = 0.1;
     int epoch = 100000;
-    final double RANDOM_COEFFIENCE = 1.0; 
+    final double RANDOM_COEFFIENCE = 1.0;
+    ActivationFunction activationFunction = ActivationFunction.SIGMOID;
+
+    public double getLambda() {
+        return lambda;
+    }
+
+    public void setLambda(double lambda) {
+        this.lambda = lambda;
+    }
+
+    public int getEpoch() {
+        return epoch;
+    }
+
+    public void setEpoch(int epoch) {
+        this.epoch = epoch;
+    }
 
     public void setWeitghts(Double[][][] weights) {
         this.weights = weights;
@@ -63,15 +80,13 @@ public class NeuralNetwork {
     }
 
     public void train(double[][] input, double[][] label) {
-        train(input, label, input.length);
-    }
-
-    public void train(double[][] input, double[][] label, int batchSize) {
         for (int i = 0; i < epoch; i++) {
-            double[][] sensitivity = estSensitivityByBatch(input, label, batchSize);
-            updateWeights(sensitivity);
-            updateBiases(sensitivity);
-            printMse(input, label);
+            for (int sampleNo = 0; sampleNo < input.length; sampleNo++) {
+                double[][] sensitivity = estSensitivity(input, label, sampleNo);
+                updateWeights(sensitivity);
+                updateBiases(sensitivity);
+                printMse(input, label);
+            }
         }
     }
 
@@ -105,30 +120,27 @@ public class NeuralNetwork {
         }
     }
 
-    private double[][] estSensitivityByBatch(double[][] input, double[][] label, int batchSize) {
+    private double[][] estSensitivity(double[][] input, double[][] label, int sampleNo) {
         double[][] sensitivity = new double[biases.length][];
         for (int i = 0; i < biases.length; i++) {
             sensitivity[i] = new double[biases[i].length];
         }
 
-        for (int k = 0; k < batchSize; k++) {
-            int sampleNo = generateSampleNo(input, batchSize);
-            double[] output = forward(input[sampleNo]);
-            for (int i = 0; i < output.length; i++) {
-                sensitivity[sensitivity.length - 1][i] += -2 * output[i] * (1 - output[i]) * (label[sampleNo][i] - output[i]);
-            }
+        double[] output = forward(input[sampleNo]);
+        for (int i = 0; i < output.length; i++) {
+            sensitivity[sensitivity.length - 1][i] = -2 * derivativeOfActFun(output[i]) * (label[sampleNo][i] - output[i]);
         }
 
         for (int layer = sensitivity.length - 2; layer >= 0; layer--) {
             for (int i = 0; i < sensitivity[layer].length; i++) {
-                sensitivity[layer][i] = outputMat[layer + 1][i] * (1 - outputMat[layer + 1][i])
+                sensitivity[layer][i] = derivativeOfActFun(outputMat[layer + 1][i])
                         * innerProduct(selectColumn(weights[layer + 1], i), sensitivity[layer + 1]);
             }
         }
         return sensitivity;
     }
 
-    private int generateSampleNo(double[][] input, int batchSize){
+    private int generateSampleNo(double[][] input, int batchSize) {
         Random random = new Random();
         int sampleNo = random.nextInt(input.length);
         return sampleNo;
@@ -153,7 +165,11 @@ public class NeuralNetwork {
     }
 
     private double activationFunction(double x) {
-        return 1 / (1 + Math.exp(-x));
+        switch (activationFunction){
+            case SIGMOID: return 1 / (1 + Math.exp(-x));
+            case LINEAR: return x;
+            default: return x;
+        }
     }
 
     private Double innerProduct(Double[] vec1, Double[] vec2) {
@@ -188,5 +204,25 @@ public class NeuralNetwork {
             outputArr[i] = inputArr[i];
         }
         return outputArr;
+    }
+
+    private double derivativeOfActFun(double output){
+        switch (activationFunction){
+            case SIGMOID: return output * (1 - output);
+            case LINEAR: return 1.0;
+            default: return 1.0;
+        }
+    }
+
+    public ActivationFunction getActivationFunction() {
+        return activationFunction;
+    }
+
+    public void setActivationFunction(ActivationFunction activationFunction) {
+        this.activationFunction = activationFunction;
+    }
+
+    public enum ActivationFunction {
+        SIGMOID, LINEAR;
     }
 }
