@@ -1,5 +1,5 @@
 /*
- * This is an example of the neural network toolbox. The main method trys to train a neural network with three level to
+ * This is an example of the neural network toolbox. The main method trys to train a neural network with three layers to
  * match the XOR operation. The network works successfully. The inputs and the corresponding correct outputs are as
  * follows:
  *   -----------------
