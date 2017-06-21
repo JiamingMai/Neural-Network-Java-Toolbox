@@ -38,7 +38,10 @@ public class Example {
         label[1][0] = 1;
         label[2][0] = 1;
         label[3][0] = 0;
-
+        
+        NeuralNetwork network = new NeuralNetwork(2, 3, 1);
+        network.setActivationFunction(NeuralNetwork.ActivationFunction.SIGMOID);
+        /*
         Double[][][] weights = new Double[2][][];
         weights[0] = new Double[3][2];
         weights[0][0][0] = 6.70482641156543;
@@ -59,11 +62,11 @@ public class Example {
         biases[0][2] = -0.525310872754804;
         biases[1] = new Double[1];
         biases[1][0] = -1.19737302691328;
-
-        NeuralNetwork network = new NeuralNetwork(2, 3, 1);
-        network.setActivationFunction(NeuralNetwork.ActivationFunction.SIGMOID);
-        // network.setWeitghts(weights);
-        // network.setBiases(biases);
+        
+        network.setWeitghts(weights);
+        network.setBiases(biases);
+        */
+                      
         network.train(input, label);
         double[] res1 = network.forward(input[0]);
         double[] res2 = network.forward(input[1]);
